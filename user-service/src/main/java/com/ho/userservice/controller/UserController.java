@@ -21,7 +21,7 @@ import java.util.List;
 import static org.springframework.http.ResponseEntity.*;
 
 @RestController
-@RequestMapping("/user-service")
+@RequestMapping("/")
 @Slf4j
 public class UserController {
 

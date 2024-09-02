@@ -23,36 +23,56 @@ spring:
             postLogger: true
 
       routes:
+        #        - id: user-service
+        #          uri: lb://USER-SERVICE
+        #          predicates: # 조건절이라 생각하면 된다.
+        #            - Path=/user-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/users
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/**
-
-        - id: user-service
-          uri: lb://CATALOG-SERVICE
-          predicates:
-            - Path=/catalog-service/**
-
-
-        - id : first-service
-          uri: lb://MY-FIRST-SERVICE
-          predicates:
-            - Path=/first-service/**
+            - Method=GET
           filters:
-#            - AddRequestHeader=first-request, first-request-header2
-#            - AddResponseHeader=first-response, first-response-header2
-             - CustomFilter
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates: # 조건절이라 생각하면 된다.
+            - Path=/order-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates: # 조건절이라 생각하면 된다.
+            - Path=/catalog-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
+        - id: first-service
+          uri: lb://MY-FIRST-SERVICE
+          predicates: # 조건절이라 생각하면 된다.
+            - Path=/first-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8081/) 로 보내겠다.
+          filters:
+            - CustomFilter
         - id: second-service
           uri: lb://MY-SECOND-SERVICE
-          predicates:
-            - Path=/second-service/**
+          predicates: # 조건절이라 생각하면 된다.
+            - Path=/second-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
           filters:
-#            - AddRequestHeader=second-request, second-request-header2
-#            - AddResponseHeader=second-response, second-response-header2
             - name: CustomFilter
             - name: LoggingFilter
-              args :
+              args:
                 baseMessage: Hi, there.
                 preLogger: true
                 postLogger: true
-

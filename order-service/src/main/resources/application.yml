@@ -3,13 +3,18 @@ server:
 
 spring:
   application:
-    name: user-service
+    name: order-service
   h2:
     console:
       enabled: true
       settings:
         web-allow-others: true
       path: /h2-console
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:test
@@ -24,13 +29,6 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
-greeting:
-  message: Welcome to the Simple E-Commerce.
-
 logging:
   level:
-    com.ho.userservice: DEBUG
-
-token :
-  expiration_time: 8640000
-  secret: user_token
+    com.ho.orderservice : DEBUG
