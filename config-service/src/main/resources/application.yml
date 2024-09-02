@@ -1,0 +1,22 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+
+  profiles:
+    active: native
+
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: file:///E:/native-file-repo
+
+        git:
+#          uri: file:///E:/git-repo
+
+          uri: https://github.com/choiseongho1/msa-cloud-config
+#          username: [username]
+#          password: [password]
