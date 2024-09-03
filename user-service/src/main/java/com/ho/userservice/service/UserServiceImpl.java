@@ -1,9 +1,13 @@
 package com.ho.userservice.service;
 
+import com.ho.userservice.client.OrderServiceClient;
 import com.ho.userservice.dto.UserDto;
+import com.ho.userservice.error.FeignErrorDecoder;
 import com.ho.userservice.jpa.UserEntity;
 import com.ho.userservice.jpa.UserRepository;
 import com.ho.userservice.vo.ResponseOrder;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
@@ -24,17 +28,20 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     BCryptPasswordEncoder passwordEncoder;
     Environment env;
     RestTemplate restTemplate;
+    OrderServiceClient orderServiceClient;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, Environment env, RestTemplate restTemplate){
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, Environment env, RestTemplate restTemplate, OrderServiceClient orderServiceClient){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.env = env;
         this.restTemplate = restTemplate;
+        this.orderServiceClient = orderServiceClient;
 
     }
 
@@ -77,7 +84,7 @@ public class UserServiceImpl implements UserService {
 
 //        List<ResponseOrder> orders = new ArrayList<>();
 
-        // 1. RestTemplate 사용방법
+        // 1. RestTemplate 사용
 //        String orderUrl = "http://127.0.0.1:8000/order-service/%s/orders";
 //        ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(
 //                orderUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<ResponseOrder>>() {});
@@ -85,13 +92,24 @@ public class UserServiceImpl implements UserService {
 //        List<ResponseOrder> orderList = orderListResponse.getBody();
 //        userDto.setOrders(orderList);
 
-        // 2. Environment 사용방법
-        String orderUrl = String.format(env.getProperty("order_service.url"), userId);
+        // 2. Environment 사용
+//        String orderUrl = String.format(env.getProperty("order_service.url"), userId);
+//
+//        ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(
+//                orderUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<ResponseOrder>>() {});
+//
+//        List<ResponseOrder> orderList = orderListResponse.getBody();
+//        userDto.setOrders(orderList);
 
-        ResponseEntity<List<ResponseOrder>> orderListResponse = restTemplate.exchange(
-                orderUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<ResponseOrder>>() {});
+        // 3. FeignClient 사용
+//        List<ResponseOrder> orderList = null;
+//        try {
+//            orderList = orderServiceClient.getOrders(userId);
+//        }catch (FeignException e){
+//            log.error(e.getMessage());
+//        }
 
-        List<ResponseOrder> orderList = orderListResponse.getBody();
+        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
         userDto.setOrders(orderList);
 
 

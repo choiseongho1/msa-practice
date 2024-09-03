@@ -38,7 +38,8 @@ greeting:
 
 logging:
   level:
-    com.ho.userservice: DEBUG
+    com.ho.userservice.client: DEBUG
+
 
 #token :
 #  expiration_time: 8640000
@@ -48,3 +49,5 @@ management:
     web:
       exposure:
         include: refresh, health, beans, busrefresh
+
+
