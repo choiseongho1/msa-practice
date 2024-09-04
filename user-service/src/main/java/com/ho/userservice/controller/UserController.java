@@ -6,6 +6,7 @@ import com.ho.userservice.service.UserService;
 import com.ho.userservice.vo.Greeting;
 import com.ho.userservice.vo.RequestUser;
 import com.ho.userservice.vo.ResponseUser;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
@@ -39,6 +40,7 @@ public class UserController {
     private Greeting greeting;
 
     @GetMapping("/health_check")
+    @Timed(value = "users.status", longTask = true)
     public String status(){
 //        return String.format("It's Working in User Service on PORT %s", env.getProperty("local.server.port"));
         return String.format("It's Working in User Service"
@@ -52,6 +54,7 @@ public class UserController {
     }
 
     @GetMapping("/welcome")
+    @Timed(value = "users.welcome", longTask = true)
     public String welcome(){
 //        return env.getProperty("greeting.message");
         return greeting.getMessage();

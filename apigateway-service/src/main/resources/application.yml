@@ -74,10 +74,23 @@ spring:
           uri: lb://ORDER-SERVICE
           predicates: # 조건절이라 생각하면 된다.
             - Path=/order-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/actuator/**
+            - Method=GET,POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+
         - id: catalog-service
           uri: lb://CATALOG-SERVICE
           predicates: # 조건절이라 생각하면 된다.
             - Path=/catalog-service/**  # 이 요청이 들어오면 무조건 (uri: http://localhost:8082/) 로 보내겠다.
+
+
+
         - id: first-service
           uri: lb://MY-FIRST-SERVICE
           predicates: # 조건절이라 생각하면 된다.
@@ -106,4 +119,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans, httptrace, busrefresh
+        include: refresh, health, beans, httptrace, busrefresh, info, metrics, prometheus
