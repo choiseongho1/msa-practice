@@ -12,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.modelmapper.spi.MatchingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
@@ -35,13 +37,21 @@ public class UserServiceImpl implements UserService {
     Environment env;
     RestTemplate restTemplate;
     OrderServiceClient orderServiceClient;
+    CircuitBreakerFactory circuitBreakerFactory;
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, Environment env, RestTemplate restTemplate, OrderServiceClient orderServiceClient){
+    public UserServiceImpl(
+            UserRepository userRepository,
+            BCryptPasswordEncoder passwordEncoder,
+            Environment env,
+            RestTemplate restTemplate,
+            OrderServiceClient orderServiceClient,
+            CircuitBreakerFactory circuitBreakerFactory){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.env = env;
         this.restTemplate = restTemplate;
         this.orderServiceClient = orderServiceClient;
+        this.circuitBreakerFactory = circuitBreakerFactory;
 
     }
 
@@ -109,7 +119,15 @@ public class UserServiceImpl implements UserService {
 //            log.error(e.getMessage());
 //        }
 
-        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+//        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+
+        log.info("Before call orders microService");
+        CircuitBreaker circuitBreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<ResponseOrder> orderList = circuitBreaker.run(()->orderServiceClient.getOrders(userId),
+                throwable -> new ArrayList<>());
+
+        log.info("After call orders microService");
+
         userDto.setOrders(orderList);
 
 
