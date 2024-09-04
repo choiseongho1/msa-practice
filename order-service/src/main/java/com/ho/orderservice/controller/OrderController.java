@@ -2,6 +2,8 @@ package com.ho.orderservice.controller;
 
 import com.ho.orderservice.dto.OrderDto;
 import com.ho.orderservice.jpa.OrderEntity;
+import com.ho.orderservice.messagequeue.KafkaProducer;
+import com.ho.orderservice.messagequeue.OrderProducer;
 import com.ho.orderservice.service.OrderService;
 import com.ho.orderservice.vo.RequestOrder;
 import com.ho.orderservice.vo.ResponseOrder;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/order-service")
@@ -22,11 +25,14 @@ public class OrderController {
 
     Environment env ;
     OrderService orderService;
-
+    KafkaProducer kafkaProducer;
+    OrderProducer orderProducer;
     @Autowired
-    public OrderController(Environment env, OrderService orderService){
+    public OrderController(Environment env, OrderService orderService, KafkaProducer kafkaProducer, OrderProducer orderProducer){
         this.env = env;
         this.orderService = orderService;
+        this.kafkaProducer = kafkaProducer;
+        this.orderProducer = orderProducer;
     }
 
     @GetMapping("/health_check")
@@ -41,9 +47,19 @@ public class OrderController {
 
         OrderDto orderDto = mapper.map(orderDetail, OrderDto.class);
         orderDto.setUserId(userId);
-        OrderDto createdOrder = orderService.createOrder(orderDto);
 
-        ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
+        /* jpa */
+//        OrderDto createdOrder = orderService.createOrder(orderDto);
+//        ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
+
+        /* Kafka */
+        orderDto.setOrderId(UUID.randomUUID().toString());
+        orderDto.setTotalPrice(orderDetail.getQty() * orderDetail.getUnitPrice());
+
+        /* send this Order to the Kafka */
+        kafkaProducer.send("example-catalog-topic", orderDto);
+        orderProducer.send("orders", orderDto);
+        ResponseOrder responseOrder = mapper.map(orderDto, ResponseOrder.class);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(responseOrder);
     }
