@@ -54,17 +54,17 @@ public class OrderController {
         orderDto.setUserId(userId);
 
         /* jpa */
-//        OrderDto createdOrder = orderService.createOrder(orderDto);
-//        ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
+        OrderDto createdOrder = orderService.createOrder(orderDto);
+        ResponseOrder responseOrder = mapper.map(createdOrder, ResponseOrder.class);
 
         /* Kafka */
-        orderDto.setOrderId(UUID.randomUUID().toString());
-        orderDto.setTotalPrice(orderDetail.getQty() * orderDetail.getUnitPrice());
+//        orderDto.setOrderId(UUID.randomUUID().toString());
+//        orderDto.setTotalPrice(orderDetail.getQty() * orderDetail.getUnitPrice());
 
         /* send this Order to the Kafka */
         kafkaProducer.send("example-catalog-topic", orderDto);
-        orderProducer.send("orders", orderDto);
-        ResponseOrder responseOrder = mapper.map(orderDto, ResponseOrder.class);
+//        orderProducer.send("orders", orderDto);
+//        ResponseOrder responseOrder = mapper.map(orderDto, ResponseOrder.class);
 
 
         log.info("After add orders data");
@@ -83,13 +83,13 @@ public class OrderController {
             result.add(new ModelMapper().map(v, ResponseOrder.class));
         });
 
-        try{
-            Thread.sleep(1000);
-            throw new Exception("장애 발생");
-        }catch (Exception e){
-            log.error(e.getMessage());
-        }
-        log.info("After retrieved orders data");
+//        try{
+//            Thread.sleep(1000);
+//            throw new Exception("장애 발생");
+//        }catch (Exception e){
+//            log.error(e.getMessage());
+//        }
+//        log.info("After retrieved orders data");
 
 
 

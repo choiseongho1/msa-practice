@@ -34,8 +34,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
         http.authorizeRequests().antMatchers("/actuator/**").permitAll();
         http.authorizeRequests().antMatchers("/**")
-
-                .hasIpAddress("192.168.219.113")
+//                .hasIpAddress("192.168.219.113")
+                .permitAll()
                 .and()
                 .addFilter(getAuthenticationFilter());
         http.headers().frameOptions().disable();    // 이거 안하면 h2-console 접근 못함
